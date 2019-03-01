@@ -156,6 +156,15 @@ void JMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Ju
   cpu->PC = cpu->registers[op0];
 }
 
+void JEQ_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump If Equal
+  (void)op1;
+  if (cpu->FL == 1) {
+    cpu->PC = cpu->registers[op0];
+  } else {
+    cpu->PC += 2;
+  }
+}
+
 /**
  * Main Loop
  */
@@ -164,18 +173,19 @@ void cpu_run(struct cpu *cpu)
 {
 
   // Assign Functions to Jump Table
-  handlers[LDI] = LDI_handler;
-  handlers[HLT] = HLT_handler;
-  handlers[PRN] = PRN_handler;
-  handlers[MUL] = MUL_handler;
-  handlers[ADD] = ADD_handler;
-  handlers[CMP] = CMP_handler;
-  handlers[HLT] = HLT_handler;
-  handlers[POP] = POP_handler;
-  handlers[PUSH] = PUSH_handler;
-  handlers[CALL] = CALL_handler;
-  handlers[RET] = RET_handler;
-  handlers[JMP] = JMP_handler;
+  handlers[LDI]  =  LDI_handler;
+  handlers[HLT]  =  HLT_handler;
+  handlers[PRN]  =  PRN_handler;
+  handlers[MUL]  =  MUL_handler;
+  handlers[ADD]  =  ADD_handler;
+  handlers[CMP]  =  CMP_handler;
+  handlers[HLT]  =  HLT_handler;
+  handlers[POP]  =  POP_handler;
+  handlers[PUSH] =  PUSH_handler;
+  handlers[CALL] =  CALL_handler;
+  handlers[RET]  =  RET_handler;
+  handlers[JMP]  =  JMP_handler;
+  handlers[JEQ]  =  JEQ_handler;
 
   int running = 1; // True until we get a HLT instruction
 
