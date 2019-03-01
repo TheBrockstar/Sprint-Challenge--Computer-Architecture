@@ -165,6 +165,15 @@ void JEQ_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Ju
   }
 }
 
+void JNE_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump If Not Equal
+  (void)op1;
+  if (cpu->FL != 1) {
+    cpu->PC = cpu->registers[op0];
+  } else {
+    cpu->PC += 2;
+  }
+}
+
 /**
  * Main Loop
  */
@@ -186,6 +195,7 @@ void cpu_run(struct cpu *cpu)
   handlers[RET]  =  RET_handler;
   handlers[JMP]  =  JMP_handler;
   handlers[JEQ]  =  JEQ_handler;
+  handlers[JNE]  =  JNE_handler;
 
   int running = 1; // True until we get a HLT instruction
 
