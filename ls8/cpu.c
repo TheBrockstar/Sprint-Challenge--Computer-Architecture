@@ -81,11 +81,15 @@ void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value) 
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
   switch (op) {
+    case ALU_ADD:
+      cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
+      break;
     case ALU_MUL:
       cpu -> registers[regA] = cpu -> registers[regA] * cpu -> registers[regB];
       break;
-    case ALU_ADD:
-      cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
+    case ALU_MOD:
+      if (cpu -> registers[regA] == 0){ printf("Divisor must not be 0."); }
+      else{ cpu -> registers[regA] = cpu -> registers[regA] % cpu -> registers[regB]; }
       break;
     case ALU_AND:
       cpu -> registers[regA] = cpu -> registers[regA] & cpu -> registers[regB];
@@ -106,7 +110,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       cpu -> registers[regA] = cpu -> registers[regA] >> cpu -> registers[regB];
       break;
     case ALU_CMP:
-      if ( cpu -> registers[regA] ==  cpu -> registers[regB]){
+      if (cpu -> registers[regA] ==  cpu -> registers[regB]){
         cpu->FL = 0x01;
       } else if (cpu -> registers[regA] < cpu -> registers[regB]) {
         cpu->FL = 0x04;
@@ -134,6 +138,7 @@ void PRN_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void
 // ALU Instructions
 void ADD_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_ADD, op0, op1); } // Add
 void MUL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_MUL, op0, op1); } // Multiply
+void MOD_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_MOD, op0, op1); } // Modulo
 void AND_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_AND, op0, op1); } // Bitwise-AND
 void OR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_OR, op0, op1); }   // Bitwise-OR
 void XOR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_XOR, op0, op1); } // Bitwise-XOR
@@ -205,6 +210,7 @@ void cpu_run(struct cpu *cpu)
   handlers[PRN]  =  PRN_handler;
   handlers[MUL]  =  MUL_handler;
   handlers[ADD]  =  ADD_handler;
+  handlers[MOD]  =  MOD_handler;
   handlers[AND]  =  AND_handler;
   handlers[OR]   =  OR_handler;
   handlers[XOR]  =  XOR_handler;

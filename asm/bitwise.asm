@@ -1,4 +1,4 @@
-# print8.asm
+# bitwise.asm
 #
 # Expected output:
 # 5
@@ -7,6 +7,7 @@
 # 231
 # 56
 # 7
+# 1
 
 LDI R0,7
 LDI R1,5
@@ -24,5 +25,7 @@ LDI R1,3
 SHL R0,R1
 PRN R0
 SHR R0,R1
+PRN R0
+MOD R0,R1
 PRN R0
 HLT
