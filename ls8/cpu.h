@@ -27,6 +27,7 @@ enum alu_op {
   ALU_XOR,
   ALU_NOT,
   ALU_SHL,
+  ALU_SHR,
   ALU_CMP
 	// Add more here
 };
@@ -49,6 +50,7 @@ enum alu_op {
 #define XOR   0b10101011
 #define NOT   0b01101001
 #define SHL   0b10101100
+#define SHR   0b10101101
 #define CMP   0b10100111
 
 // Stack Instructions

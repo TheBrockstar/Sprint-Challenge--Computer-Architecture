@@ -6,6 +6,7 @@
 # 24
 # 231
 # 56
+# 7
 
 LDI R0,7
 LDI R1,5
@@ -21,5 +22,7 @@ NOT R0
 PRN R0
 LDI R1,3
 SHL R0,R1
+PRN R0
+SHR R0,R1
 PRN R0
 HLT
