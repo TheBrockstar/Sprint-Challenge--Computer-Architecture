@@ -88,9 +88,9 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
       break;
     case ALU_CMP:
-      if (regA == regB){
+      if ( cpu -> registers[regA] ==  cpu -> registers[regB]){
         cpu->FL = 0x01;
-      } else if (regA < regB) {
+      } else if (cpu -> registers[regA] < cpu -> registers[regB]) {
         cpu->FL = 0x04;
       } else {
         cpu->FL = 0x02;
@@ -128,13 +128,8 @@ void POP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Po
 
 void PUSH_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Push
   (void)op1;
-  if (cpu->registers[7] != 0x00) {
     cpu->registers[7] -= 1; 
     cpu_ram_write(cpu, cpu->registers[7],  cpu->registers[op0]); 
-  } else {
-    printf("Stack Overflow.");
-    exit(4);
-  }
 }
 
 // PC Explicit Instructions
