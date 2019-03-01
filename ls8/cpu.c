@@ -81,11 +81,42 @@ void cpu_ram_write(struct cpu *cpu, unsigned char address, unsigned char value) 
 void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB)
 {
   switch (op) {
+    case ALU_ADD:
+      cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
+      break;
     case ALU_MUL:
       cpu -> registers[regA] = cpu -> registers[regA] * cpu -> registers[regB];
       break;
-    case ALU_ADD:
-      cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
+    case ALU_MOD:
+      if (cpu -> registers[regA] == 0){ printf("Divisor must not be 0."); }
+      else{ cpu -> registers[regA] = cpu -> registers[regA] % cpu -> registers[regB]; }
+      break;
+    case ALU_AND:
+      cpu -> registers[regA] = cpu -> registers[regA] & cpu -> registers[regB];
+      break;
+    case ALU_OR:
+      cpu -> registers[regA] = cpu -> registers[regA] | cpu -> registers[regB];
+      break;
+    case ALU_XOR:
+      cpu -> registers[regA] = cpu -> registers[regA] ^ cpu -> registers[regB];
+      break;
+    case ALU_NOT:
+      cpu -> registers[regA] = ~cpu -> registers[regA];
+      break;
+    case ALU_SHL:
+      cpu -> registers[regA] = cpu -> registers[regA] << cpu -> registers[regB];
+      break;
+    case ALU_SHR:
+      cpu -> registers[regA] = cpu -> registers[regA] >> cpu -> registers[regB];
+      break;
+    case ALU_CMP:
+      if (cpu -> registers[regA] ==  cpu -> registers[regB]){
+        cpu->FL = 0x01;
+      } else if (cpu -> registers[regA] < cpu -> registers[regB]) {
+        cpu->FL = 0x04;
+      } else {
+        cpu->FL = 0x02;
+      }
       break;
     // TODO: implement more ALU ops
   }
@@ -100,13 +131,22 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 void (*handlers[256])(struct cpu *cpu, unsigned char op0, unsigned char op1) = {0};
 
 // General Instructions
-void LDI_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu->registers[op0] = op1; } // Set Register  
+void LDI_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu->registers[op0] = op1; } // Set Register
+void ST_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu_ram_write(cpu, cpu->registers[op0],  cpu->registers[op1]); } // Set Value  
 void HLT_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void)cpu; (void)op0; (void)op1; exit(0); } // Halt
 void PRN_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void)op1; printf("%d\n", cpu->registers[op0]); } // Print
 
 // ALU Instructions
 void ADD_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_ADD, op0, op1); } // Add
 void MUL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_MUL, op0, op1); } // Multiply
+void MOD_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_MOD, op0, op1); } // Modulo
+void AND_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_AND, op0, op1); } // Bitwise-AND
+void OR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_OR, op0, op1); }   // Bitwise-OR
+void XOR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_XOR, op0, op1); } // Bitwise-XOR
+void NOT_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_NOT, op0, op1); } // Bitwise-NOT
+void SHL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_SHL, op0, op1); } // Bitwise-Shift Left
+void SHR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_SHR, op0, op1); } // Bitwise-Shift Right
+void CMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_CMP, op0, op1); } // Compare
 
 // Stack Instructions
 void POP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Pop
@@ -117,13 +157,8 @@ void POP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Po
 
 void PUSH_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Push
   (void)op1;
-  if (cpu->registers[7] != 0x00) {
     cpu->registers[7] -= 1; 
     cpu_ram_write(cpu, cpu->registers[7],  cpu->registers[op0]); 
-  } else {
-    printf("Stack Overflow.");
-    exit(4);
-  }
 }
 
 // PC Explicit Instructions
@@ -135,11 +170,33 @@ void CALL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // C
 }
 
 void RET_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Return
-  (void)op1; (void)op0;
+  (void)op0; (void)op1;
   cpu->PC = cpu_ram_read(cpu, cpu->registers[7]);
   if (cpu->registers[7] != 0xF4) cpu->registers[7] += 1;
 }
 
+void JMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump
+  (void)op1;
+  cpu->PC = cpu->registers[op0];
+}
+
+void JEQ_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump If Equal
+  (void)op1;
+  if (cpu->FL == 1) {
+    cpu->PC = cpu->registers[op0];
+  } else {
+    cpu->PC += 2;
+  }
+}
+
+void JNE_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump If Not Equal
+  (void)op1;
+  if (cpu->FL != 1) {
+    cpu->PC = cpu->registers[op0];
+  } else {
+    cpu->PC += 2;
+  }
+}
 
 /**
  * Main Loop
@@ -149,16 +206,28 @@ void cpu_run(struct cpu *cpu)
 {
 
   // Assign Functions to Jump Table
-  handlers[LDI] = LDI_handler;
-  handlers[HLT] = HLT_handler;
-  handlers[PRN] = PRN_handler;
-  handlers[MUL] = MUL_handler;
-  handlers[ADD] = ADD_handler;
-  handlers[HLT] = HLT_handler;
-  handlers[POP] = POP_handler;
-  handlers[PUSH] = PUSH_handler;
-  handlers[CALL] = CALL_handler;
-  handlers[RET] = RET_handler;
+  handlers[LDI]  =  LDI_handler;
+  handlers[ST]  =   ST_handler;
+  handlers[HLT]  =  HLT_handler;
+  handlers[PRN]  =  PRN_handler;
+  handlers[MUL]  =  MUL_handler;
+  handlers[ADD]  =  ADD_handler;
+  handlers[MOD]  =  MOD_handler;
+  handlers[AND]  =  AND_handler;
+  handlers[OR]   =  OR_handler;
+  handlers[XOR]  =  XOR_handler;
+  handlers[NOT]  =  NOT_handler;
+  handlers[SHL]  =  SHL_handler;
+  handlers[SHR]  =  SHR_handler;
+  handlers[CMP]  =  CMP_handler;
+  handlers[HLT]  =  HLT_handler;
+  handlers[POP]  =  POP_handler;
+  handlers[PUSH] =  PUSH_handler;
+  handlers[CALL] =  CALL_handler;
+  handlers[RET]  =  RET_handler;
+  handlers[JMP]  =  JMP_handler;
+  handlers[JEQ]  =  JEQ_handler;
+  handlers[JNE]  =  JNE_handler;
 
   int running = 1; // True until we get a HLT instruction
 
@@ -201,6 +270,7 @@ void cpu_run(struct cpu *cpu)
 void cpu_init(struct cpu *cpu)
 {
   cpu->PC = 0;
+  cpu->FL = 0;
   memset(cpu->registers, 0, 8);
   memset(cpu->ram, 0, 256);
   cpu->registers[7] = 0xF4;

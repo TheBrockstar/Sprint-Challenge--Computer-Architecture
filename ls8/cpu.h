@@ -8,6 +8,9 @@ struct cpu {
   // PC
   unsigned char PC;
 
+  // FL
+  unsigned char FL;
+
   // registers (array)
   unsigned char registers[8];
 
@@ -17,8 +20,16 @@ struct cpu {
 
 // ALU operations
 enum alu_op {
+  ALU_ADD,
 	ALU_MUL,
-  ALU_ADD
+  ALU_MOD,
+  ALU_AND,
+  ALU_OR,
+  ALU_XOR,
+  ALU_NOT,
+  ALU_SHL,
+  ALU_SHR,
+  ALU_CMP
 	// Add more here
 };
 
@@ -29,12 +40,21 @@ enum alu_op {
 
 // General Instructions
 #define LDI   0b10000010
+#define ST    0b10000100
 #define HLT   0b00000001
 #define PRN   0b01000111
 
 // ALU Instructions
 #define ADD   0b10100000
 #define MUL   0b10100010
+#define MOD   0b10100100
+#define AND   0b10101000
+#define OR    0b10101010
+#define XOR   0b10101011
+#define NOT   0b01101001
+#define SHL   0b10101100
+#define SHR   0b10101101
+#define CMP   0b10100111
 
 // Stack Instructions
 #define POP   0b01000110
