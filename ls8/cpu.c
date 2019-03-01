@@ -131,7 +131,8 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
 void (*handlers[256])(struct cpu *cpu, unsigned char op0, unsigned char op1) = {0};
 
 // General Instructions
-void LDI_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu->registers[op0] = op1; } // Set Register  
+void LDI_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu->registers[op0] = op1; } // Set Register
+void ST_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { cpu_ram_write(cpu, cpu->registers[op0],  cpu->registers[op1]); } // Set Value  
 void HLT_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void)cpu; (void)op0; (void)op1; exit(0); } // Halt
 void PRN_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void)op1; printf("%d\n", cpu->registers[op0]); } // Print
 
@@ -206,6 +207,7 @@ void cpu_run(struct cpu *cpu)
 
   // Assign Functions to Jump Table
   handlers[LDI]  =  LDI_handler;
+  handlers[ST]  =   ST_handler;
   handlers[HLT]  =  HLT_handler;
   handlers[PRN]  =  PRN_handler;
   handlers[MUL]  =  MUL_handler;

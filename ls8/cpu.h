@@ -40,6 +40,7 @@ enum alu_op {
 
 // General Instructions
 #define LDI   0b10000010
+#define ST    0b10000100
 #define HLT   0b00000001
 #define PRN   0b01000111
 
