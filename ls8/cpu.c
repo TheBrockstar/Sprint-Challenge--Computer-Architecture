@@ -146,11 +146,15 @@ void CALL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // C
 }
 
 void RET_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Return
-  (void)op1; (void)op0;
+  (void)op0; (void)op1;
   cpu->PC = cpu_ram_read(cpu, cpu->registers[7]);
   if (cpu->registers[7] != 0xF4) cpu->registers[7] += 1;
 }
 
+void JMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Jump
+  (void)op1;
+  cpu->PC = cpu->registers[op0];
+}
 
 /**
  * Main Loop
@@ -171,6 +175,7 @@ void cpu_run(struct cpu *cpu)
   handlers[PUSH] = PUSH_handler;
   handlers[CALL] = CALL_handler;
   handlers[RET] = RET_handler;
+  handlers[JMP] = JMP_handler;
 
   int running = 1; // True until we get a HLT instruction
 
