@@ -4,6 +4,7 @@
 # 5
 # 13
 # 24
+# 231
 
 LDI R0,7
 LDI R1,5
@@ -14,5 +15,7 @@ OR R0,R1
 PRN R0
 LDI R1,21
 XOR R0,R1
+PRN R0
+NOT R0
 PRN R0
 HLT

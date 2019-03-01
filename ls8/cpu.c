@@ -96,6 +96,9 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     case ALU_XOR:
       cpu -> registers[regA] = cpu -> registers[regA] ^ cpu -> registers[regB];
       break;
+    case ALU_NOT:
+      cpu -> registers[regA] = ~cpu -> registers[regA];
+      break;
     case ALU_CMP:
       if ( cpu -> registers[regA] ==  cpu -> registers[regB]){
         cpu->FL = 0x01;
@@ -128,6 +131,7 @@ void MUL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(c
 void AND_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_AND, op0, op1); } // Bitwise-AND
 void OR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_OR, op0, op1); } // Bitwise-OR
 void XOR_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_XOR, op0, op1); } // Bitwise-XOR
+void NOT_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_NOT, op0, op1); } // Bitwise-NOT
 void CMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_CMP, op0, op1); } // Compare
 
 
@@ -196,9 +200,10 @@ void cpu_run(struct cpu *cpu)
   handlers[PRN]  =  PRN_handler;
   handlers[MUL]  =  MUL_handler;
   handlers[ADD]  =  ADD_handler;
+  handlers[AND]  =  AND_handler;
   handlers[OR]   =  OR_handler;
   handlers[XOR]  =  XOR_handler;
-  handlers[AND]  =  AND_handler;
+  handlers[NOT]  =  NOT_handler;
   handlers[CMP]  =  CMP_handler;
   handlers[HLT]  =  HLT_handler;
   handlers[POP]  =  POP_handler;
