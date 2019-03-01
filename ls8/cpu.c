@@ -212,6 +212,7 @@ void cpu_run(struct cpu *cpu)
 void cpu_init(struct cpu *cpu)
 {
   cpu->PC = 0;
+  cpu->FL = 0;
   memset(cpu->registers, 0, 8);
   memset(cpu->ram, 0, 256);
   cpu->registers[7] = 0xF4;

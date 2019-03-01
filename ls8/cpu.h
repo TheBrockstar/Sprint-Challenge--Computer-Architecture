@@ -8,6 +8,9 @@ struct cpu {
   // PC
   unsigned char PC;
 
+  // FL
+  unsigned char FL;
+
   // registers (array)
   unsigned char registers[8];
 
