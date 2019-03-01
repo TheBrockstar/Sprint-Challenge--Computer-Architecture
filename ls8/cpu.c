@@ -89,11 +89,11 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       break;
     case ALU_CMP:
       if (regA == regB){
-
+        cpu->FL = 0x01;
       } else if (regA < regB) {
-
+        cpu->FL = 0x04;
       } else {
-
+        cpu->FL = 0x02;
       }
       break;
     // TODO: implement more ALU ops
@@ -165,6 +165,7 @@ void cpu_run(struct cpu *cpu)
   handlers[PRN] = PRN_handler;
   handlers[MUL] = MUL_handler;
   handlers[ADD] = ADD_handler;
+  handlers[CMP] = CMP_handler;
   handlers[HLT] = HLT_handler;
   handlers[POP] = POP_handler;
   handlers[PUSH] = PUSH_handler;

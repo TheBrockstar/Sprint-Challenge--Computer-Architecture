@@ -39,6 +39,7 @@ enum alu_op {
 // ALU Instructions
 #define ADD   0b10100000
 #define MUL   0b10100010
+#define CMP   0b10100111
 
 // Stack Instructions
 #define POP   0b01000110
