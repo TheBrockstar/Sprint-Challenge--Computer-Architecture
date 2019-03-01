@@ -87,6 +87,15 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     case ALU_ADD:
       cpu -> registers[regA] = cpu -> registers[regA] + cpu -> registers[regB];
       break;
+    case ALU_CMP:
+      if (regA == regB){
+
+      } else if (regA < regB) {
+
+      } else {
+
+      }
+      break;
     // TODO: implement more ALU ops
   }
 }
@@ -107,6 +116,8 @@ void PRN_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { (void
 // ALU Instructions
 void ADD_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_ADD, op0, op1); } // Add
 void MUL_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_MUL, op0, op1); } // Multiply
+void CMP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { alu(cpu, ALU_CMP, op0, op1); } // Compare
+
 
 // Stack Instructions
 void POP_handler (struct cpu *cpu, unsigned char op0, unsigned char op1) { // Pop
